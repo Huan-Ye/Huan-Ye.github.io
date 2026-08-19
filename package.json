@@ -1,0 +1,12 @@
+{
+  "name": "huan-ye-research-library",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/content-policy.test.mjs tests/build.test.mjs",
+    "test:content": "node --test tests/content-policy.test.mjs",
+    "test:build": "node --test tests/build.test.mjs",
+    "test:browser": "node --test tests/browser-smoke.test.mjs"
+  }
+}
