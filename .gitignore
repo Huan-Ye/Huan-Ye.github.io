@@ -1,4 +1,5 @@
 .qa/
 .tmp/
+.impeccable/
 node_modules/
 *.log

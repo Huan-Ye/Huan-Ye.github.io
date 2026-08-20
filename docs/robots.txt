@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://huan-ye.github.io/sitemap.xml
