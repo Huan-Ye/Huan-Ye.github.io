@@ -42,6 +42,8 @@ test('excludes original-user background and individualized advice', () => {
     '第14稿',
     '第15稿',
     '用户个人拥有较高职业迁移能力',
+    '对个人而言，有用的不是',
+    '写成可协商的具体合同',
   ];
 
   for (const phrase of forbidden) {

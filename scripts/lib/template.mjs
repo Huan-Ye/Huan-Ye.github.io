@@ -55,6 +55,7 @@ export function renderPage({ title, description, path, body, pageKind }) {
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:type" content="article">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/styles.css">
   <script type="module" src="/assets/site.js"></script>
 </head>
