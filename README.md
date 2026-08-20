@@ -5,6 +5,7 @@
 当前首个专题是：
 
 - [日本“失落三十年”的阶段机制及其对当代中国的借鉴](https://huan-ye.github.io/research/japan-lost-decades/)
+- [AI Agent：宏观经济、行业重组与社会结构](https://huan-ye.github.io/research/ai-agent-economy/)
 
 ## 内容与边界
 

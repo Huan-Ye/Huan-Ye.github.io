@@ -82,6 +82,11 @@ test('research pages work at desktop and mobile widths without horizontal page o
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   if (screenshotDir) await page.screenshot({ path: join(screenshotDir, 'topic-desktop.png'), fullPage: true });
 
+  await page.goto(`http://127.0.0.1:${port}/research/ai-agent-economy/`, { waitUntil: 'domcontentloaded' });
+  await assert.doesNotReject(page.getByRole('heading', { name: 'AI Agent：宏观经济、行业重组与社会结构' }).waitFor());
+  assert.equal(await page.locator('.volume-row').count(), 4);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`http://127.0.0.1:${port}/research/japan-lost-decades/volume-1.html`, { waitUntil: 'domcontentloaded' });
   const toggle = page.getByRole('button', { name: '本文目录' });

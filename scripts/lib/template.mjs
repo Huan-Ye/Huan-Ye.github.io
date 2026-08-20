@@ -153,3 +153,42 @@ export function renderArticle({ volume, rendered }) {
   </main>`;
   return renderPage({ title: volume.title, description: volume.summary, path: volume.path, body, pageKind: 'article' });
 }
+
+export function renderHomePage() {
+  const topics = site.topics.map((topic) => `<a class="archive-topic" href="${topic.path}">
+    <span class="archive-topic-index">${escapeHtml(topic.index)}</span>
+    <span class="archive-topic-title">${escapeHtml(topic.title)}</span>
+    <span class="archive-topic-summary">${escapeHtml(topic.description)}</span>
+    <span class="archive-topic-action">进入专题 <span aria-hidden="true">→</span></span>
+  </a>`).join('');
+  const body = `<main class="library-home">
+    <section class="library-register" aria-labelledby="library-title">
+      <div><p class="register-label">PUBLIC RESEARCH SHELF</p><h1 id="library-title">开放研究资料库</h1></div>
+      <p>一些研究、分析、公司简报和未必完整的想法。它们不承诺持续更新；若恰好有用，可以自由阅读和取用。</p>
+    </section>
+    <section class="archive-index" aria-labelledby="archive-index-title"><h2 id="archive-index-title">已归档专题</h2>${topics}</section>
+  </main>`;
+  return renderPage({ title: site.title, description: site.description, path: site.homePath, body, pageKind: 'home' });
+}
+
+export function renderTopicPage(topic) {
+  const volumeRows = topic.volumes.map((volume, index) => `<a class="volume-row" href="${volume.path}">
+    <span class="volume-number">${String(index + 1).padStart(2, '0')}</span>
+    <span class="volume-info"><strong>${escapeHtml(volume.title)}</strong><span>${escapeHtml(volume.summary)}</span></span>
+    <span class="volume-cutoff">数据截止<br><b>${escapeHtml(volume.cutoff)}</b></span><span class="volume-arrow" aria-hidden="true">→</span>
+  </a>`).join('');
+  const attachment = topic.attachment ? `<a class="attachment-row" href="${topic.attachment.path}"><span>CSV</span><strong>${escapeHtml(topic.attachment.title)}</strong><span>下载 →</span></a>` : '';
+  const body = `<main class="topic-page">
+    <section class="topic-register" aria-labelledby="topic-title"><div class="topic-register-inner"><p class="register-label">${escapeHtml(topic.index)} · ${topic.volumes.length} DOCUMENTS</p><h1 id="topic-title">${escapeHtml(topic.title)}</h1><p class="topic-lede">${escapeHtml(topic.lede)}</p></div><span class="accession-tab" aria-label="专题编号">${escapeHtml(topic.accession)}</span></section>
+    <section class="finding-aid" aria-label="专题导读"><div class="topic-summary"><h2>阅读说明</h2><p>${escapeHtml(topic.description)}</p><p>正文保留事实、推断、不确定性与反方证据；资料链接和数据截止日期列于各篇页面。</p><div class="evidence-note"><b>资料属性</b><span>${escapeHtml(topic.note)}</span></div></div><div class="reading-path"><h2>阅读路径（${topic.volumes.length} 份文档）</h2>${volumeRows}${attachment}</div></section>
+  </main>`;
+  return renderPage({ title: topic.title, description: topic.description, path: topic.path, body, pageKind: 'topic' });
+}
+
+export function renderArticlePage({ topic, volume, rendered }) {
+  const body = `<main class="article-page">
+    <header class="article-register"><a href="${topic.path}">${escapeHtml(topic.index)}</a><span>${escapeHtml(volume.title)}</span><span class="article-cutoff">数据截止 ${escapeHtml(volume.cutoff)}</span></header>
+    <div class="article-frame"><aside class="toc-panel" aria-label="本文目录"><button class="toc-toggle" type="button" aria-expanded="false" aria-controls="article-toc">本文目录</button><nav id="article-toc" class="article-toc" aria-label="本文目录"><ol>${rendered.tocHtml}</ol></nav></aside><article class="research-article"><div class="article-deck"><span>${escapeHtml(volume.title)}</span><span>约 ${rendered.readingMinutes} 分钟阅读</span></div>${rendered.html}</article></div>
+  </main>`;
+  return renderPage({ title: volume.title, description: volume.summary, path: volume.path, body, pageKind: 'article' });
+}

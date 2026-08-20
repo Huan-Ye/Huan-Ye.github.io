@@ -4,7 +4,7 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { site } from '../site.config.mjs';
 import { renderMarkdown } from './lib/markdown.mjs';
-import { renderArticle, renderHome, renderTopic } from './lib/template.mjs';
+import { renderArticlePage, renderHomePage, renderTopicPage } from './lib/template.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const defaultRootDir = resolve(scriptDir, '..');
@@ -25,9 +25,22 @@ async function writeOutput(outputDir, relativePath, contents) {
 }
 
 function sitemap(baseUrl) {
-  const routes = [site.homePath, site.topicPath, ...site.volumes.map((volume) => volume.path)];
+  const routes = [site.homePath, ...site.topics.flatMap((topic) => [topic.path, ...topic.volumes.map((volume) => volume.path)])];
   const urls = routes.map((path) => `  <url><loc>${new URL(path, baseUrl).toString()}</loc></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+}
+
+const legacyMarkdownLinks = new Map([
+  ['02_source_log.md', '/research/ai-agent-economy/sources.html'],
+  ['19_macro_industry_real_economy_volume.md', '/research/ai-agent-economy/volume-1.html'],
+  ['20_industry_transformation_matrix.md', '/research/ai-agent-economy/industry-matrix.html'],
+]);
+
+function rewritePublicLinks(markdown) {
+  return markdown.replace(/\[([^\]]+)\]\(([^)]+\.md)\)/g, (match, label, href) => {
+    const target = legacyMarkdownLinks.get(href.replace(/^\.\//, ''));
+    return target ? `[${label}](${target})` : label;
+  });
 }
 
 export async function buildSite({ rootDir = defaultRootDir, outputDir = resolve(defaultRootDir, 'docs'), baseUrl = site.baseUrl } = {}) {
@@ -38,15 +51,18 @@ export async function buildSite({ rootDir = defaultRootDir, outputDir = resolve(
   await mkdir(output, { recursive: true });
 
   await cp(resolve(root, 'assets'), resolve(output, 'assets'), { recursive: true });
-  await cp(resolve(root, site.attachment.source), resolve(output, site.attachment.path.slice(1)), { recursive: false });
+  await writeOutput(output, 'index.html', renderHomePage());
 
-  await writeOutput(output, 'index.html', renderHome());
-  await writeOutput(output, 'research/japan-lost-decades/index.html', renderTopic());
-
-  for (const volume of site.volumes) {
-    const markdown = await readFile(resolve(root, volume.source), 'utf8');
-    const rendered = renderMarkdown(markdown);
-    await writeOutput(output, volume.path.slice(1), renderArticle({ volume, rendered }));
+  for (const topic of site.topics) {
+    if (topic.attachment) {
+      await cp(resolve(root, topic.attachment.source), resolve(output, topic.attachment.path.slice(1)), { recursive: false });
+    }
+    await writeOutput(output, `${topic.path.slice(1)}index.html`, renderTopicPage(topic));
+    for (const volume of topic.volumes) {
+      const markdown = rewritePublicLinks(await readFile(resolve(root, volume.source), 'utf8'));
+      const rendered = renderMarkdown(markdown);
+      await writeOutput(output, volume.path.slice(1), renderArticlePage({ topic, volume, rendered }));
+    }
   }
 
   await writeOutput(output, 'robots.txt', `User-agent: *\nAllow: /\nSitemap: ${new URL('/sitemap.xml', baseUrl).toString()}\n`);

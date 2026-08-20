@@ -13,6 +13,12 @@ const dataPath = join(
   'data',
   'japan-national-civil-service-applications.csv',
 );
+const agentContentRoot = join(repositoryRoot, 'content', 'research', 'ai-agent-development');
+const agentPaths = [
+  join(agentContentRoot, 'volume-1.md'),
+  join(agentContentRoot, 'industry-matrix.md'),
+  join(agentContentRoot, 'volume-2.md'),
+];
 
 function loadPublicVolumes() {
   assert.equal(existsSync(volume1Path), true, 'public Volume 1 must exist');
@@ -26,6 +32,16 @@ function loadPublicVolumes() {
 test('publishes both volumes and the supporting data attachment', () => {
   loadPublicVolumes();
   assert.equal(existsSync(dataPath), true, 'supporting CSV must exist');
+});
+
+test('publishes three public AI Agent research files without the individualized appendix', () => {
+  for (const file of agentPaths) {
+    assert.equal(existsSync(file), true, `public AI Agent file must exist: ${file}`);
+  }
+  const socialVolume = readFileSync(agentPaths[2], 'utf8');
+  assert.doesNotMatch(socialVolume, /个人四项简节/);
+  assert.doesNotMatch(socialVolume, /个人应把 Agent 当作受限委托工具/);
+  assert.match(socialVolume, /职业会先被重新分层/);
 });
 
 test('excludes original-user background and individualized advice', () => {

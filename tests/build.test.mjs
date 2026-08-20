@@ -12,6 +12,11 @@ const expectedFiles = [
   'research/japan-lost-decades/volume-1.html',
   'research/japan-lost-decades/volume-2.html',
   'research/japan-lost-decades/data/japan-national-civil-service-applications.csv',
+  'research/ai-agent-economy/index.html',
+  'research/ai-agent-economy/volume-1.html',
+  'research/ai-agent-economy/industry-matrix.html',
+  'research/ai-agent-economy/volume-2.html',
+  'research/ai-agent-economy/sources.html',
   'assets/styles.css',
   'assets/site.js',
   'robots.txt',
@@ -25,7 +30,7 @@ function outputPathForHref(outputDir, htmlPath, href) {
   return resolve(outputDir, `.${pathname}`);
 }
 
-test('buildSite publishes a navigable four-page research library', async () => {
+test('buildSite publishes a navigable multi-topic research library', async () => {
   const { buildSite } = await import('../scripts/build.mjs');
   const outputDir = mkdtempSync(join(tmpdir(), 'huan-ye-library-'));
 
@@ -43,6 +48,9 @@ test('buildSite publishes a navigable four-page research library', async () => {
     const topic = readFileSync(join(outputDir, 'research/japan-lost-decades/index.html'), 'utf8');
     const volume1 = readFileSync(join(outputDir, 'research/japan-lost-decades/volume-1.html'), 'utf8');
     const volume2 = readFileSync(join(outputDir, 'research/japan-lost-decades/volume-2.html'), 'utf8');
+    const agentTopic = readFileSync(join(outputDir, 'research/ai-agent-economy/index.html'), 'utf8');
+    const agentVolume1 = readFileSync(join(outputDir, 'research/ai-agent-economy/volume-1.html'), 'utf8');
+    const agentVolume2 = readFileSync(join(outputDir, 'research/ai-agent-economy/volume-2.html'), 'utf8');
     const sitemap = readFileSync(join(outputDir, 'sitemap.xml'), 'utf8');
 
     assert.match(topic, /日本“失落三十年”的阶段机制及其对当代中国的借鉴/);
@@ -53,13 +61,22 @@ test('buildSite publishes a navigable four-page research library', async () => {
     assert.match(volume1, /class="article-toc"/);
     assert.match(volume1, /日本大银行不良贷款率/);
     assert.match(volume2, /就业冰河期/);
+    assert.match(agentTopic, /AI Agent：宏观经济、行业重组与社会结构/);
+    assert.match(agentTopic, /行业转型矩阵/);
+    assert.match(agentVolume1, /AI Agent、宏观经济与实体产业重组/);
+    assert.match(agentVolume2, /职业会先被重新分层/);
+    assert.doesNotMatch(agentVolume2, /个人四项简节/);
     assert.match(sitemap, /https:\/\/huan-ye\.github\.io\/research\/japan-lost-decades\/volume-2\.html/);
+    assert.match(sitemap, /https:\/\/huan-ye\.github\.io\/research\/ai-agent-economy\/sources\.html/);
 
     for (const [htmlPath, html] of [
       ['index.html', readFileSync(join(outputDir, 'index.html'), 'utf8')],
       ['research/japan-lost-decades/index.html', topic],
       ['research/japan-lost-decades/volume-1.html', volume1],
       ['research/japan-lost-decades/volume-2.html', volume2],
+      ['research/ai-agent-economy/index.html', agentTopic],
+      ['research/ai-agent-economy/volume-1.html', agentVolume1],
+      ['research/ai-agent-economy/volume-2.html', agentVolume2],
     ]) {
       for (const href of html.matchAll(/href="([^"]+)"/g)) {
         const target = outputPathForHref(outputDir, htmlPath, href[1]);
